@@ -1,0 +1,9 @@
+{
+    "require": {
+        "botman/botman": "^2.8",
+        "botman/driver-web": "^1.5",
+        "botman/driver-telegram": "^2.0",
+        "symfony/cache": "^7.0",
+        "genkovich/dialog-flow-bot-man-middleware": "^0.0.6"
+    }
+}

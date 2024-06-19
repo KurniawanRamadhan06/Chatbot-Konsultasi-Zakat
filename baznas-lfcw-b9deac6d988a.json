@@ -1,0 +1,13 @@
+{
+  "type": "service_account",
+  "project_id": "baznas-lfcw",
+  "private_key_id": "b9deac6d988a002ff68636efa74fc5ad48b564f2",
+  "private_key": "-----BEGIN PRIVATE KEY-----\nMIIEvQIBADANBgkqhkiG9w0BAQEFAASCBKcwggSjAgEAAoIBAQCUnL2zomfQfGOR\n35OLStucTKo9hHKn00tb6LiVd6Vou+gxlLVAAL5x26QWRX21b6W0IpgJUDVUPyA7\nLC+BoT7mLs3L67khoBV9tvUrZopC9ZjCUB6kWdoJHr/ueAzfObowRnn/3vYMTepm\naaqVyw+nQTFNgYGtcKCYelZQVTwddWynANwE2ZWchPhJqh/9gPptWK2Vf3rABr2f\nOjdMGFPa/ltZfxcPe3yNsgqHFRxN9uvqhqZuYMWC6PVQWEJMPHymqjTdJrVxrnJ3\nPF5VyxVPC82Oi1sbzjJO75riBPJQNBhqGCITUHHXZaTsVLZErqp12zs9PvbPI2mb\nZC9X/1cjAgMBAAECggEARQx2j6obtiC1WqeYtBV56Csuxhpt81AXKYL9kGTg88Kq\n5a6EcFJoKhq1KKvs9ooDYajZHyqnPJd/8D5dbEtxIB4K/H5vrBHnKlwBmcKw5t+Z\ntF7pfc9JoQcqgjBBOs5lldyI/runcpwZFrBt099fTITb1XkguWclFvNwey6/Gagp\nw7vXP348PLcbItEc444caIOXJ3VH5vQE5kOYVdWpYndM9BTRVrf1Ul2jwdwqNU+z\ni9r1gMKF0sDh8CVKS7N+C7IDJ00+L9sFdATNpA6L0IxyTZS5LGqeMPIV3C0+uv8w\nZ8/mNEzzUavj90Rk6cMg5PioS+N1wC4TFMgyW6xXMQKBgQDQoGddnFdp2IBPXKXA\nNVMXiZ1FvBm4PZZxOxQbIRBYKoB1jOoN+86IMgyrqG8IcyhfYPKY0ptMbsVvAS0v\nI/fI1q8LssjbCeVstZ4p86FdQ5PGxhxpzZgTOtvmGS6mB64pfoQ1Nnn/nk6Ck3E9\nAezOuFQsoZDh5NKboWGaQk6rJwKBgQC2W6rN7est8Y6oRU7DhQfefumhobRSgap1\n+JDcJLnNctgg/b/iMF3xbfc0mjbu99zrCdFhf4Xb5zz+Ix7yqdehEjZ1Tp2ACQrf\nqbBZq7DkMLo8EVUKwMUfiTzcduQYUxmi7WQnvsOELPT8sJ+TThcAT5k0vRvzSheb\nqRri780hpQKBgQCbNCmRv4RcTt8tqzv34PO+1/azcTslEFRCSnQrto5FOOE2Ei3x\nVzoPokRA094+SAVp52KzBELaOrIQYayunDBzLhstNcUtBpCyLe7LQN7z1hky0CFF\nKNkQvUHoTSWiCKatYdyTBcL+wlOf2nZsr2jvZLviNBPnqWZwtz84FkoWEwKBgGUx\nIuwZHUsmYyJPK3DlzkMSK/UsNVMfbwb9wuzWWGCAXRyZkrQiYM8LVYVUGi2rT2UB\n0rWGvTIU9EyWEqNXyjcwUxXvZQjae7U3hYuM8aD+xSl1+Ln51Kk2T5aLRvGUk4JM\ntyoy+m3LQLtEC5kDWVIr2XlhgzQTJlyTjz7lEPCdAoGAB8atV9IwXGfrjcW6T/xr\nS+PncCieZk/5bZGEr2VofH2ZARSKa//Wi4XautGGcvIQGgRBAt3jCC/3V8VytGbM\nOGbfg/5BnAulOLcMRbFmgYwcMaHN4zl6IWHsFvpM27XxWjEWeXNskqzIU6UJp0I6\nqemmbMB95WBa8u6s4Z1Qvbo=\n-----END PRIVATE KEY-----\n",
+  "client_email": "adminckbservice@baznas-lfcw.iam.gserviceaccount.com",
+  "client_id": "114185525315197504096",
+  "auth_uri": "https://accounts.google.com/o/oauth2/auth",
+  "token_uri": "https://oauth2.googleapis.com/token",
+  "auth_provider_x509_cert_url": "https://www.googleapis.com/oauth2/v1/certs",
+  "client_x509_cert_url": "https://www.googleapis.com/robot/v1/metadata/x509/adminckbservice%40baznas-lfcw.iam.gserviceaccount.com",
+  "universe_domain": "googleapis.com"
+}
