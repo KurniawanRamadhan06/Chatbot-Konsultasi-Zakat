@@ -12,7 +12,7 @@ class conversationZakatPertanianDalil extends Conversation
 {
     public function sayDalilPertanian()
     {
-        $this->say("<b>Dalil Zakat Pertanian</b>", ['parse_mode' => 'HTML']);
+        $this->say("<b>Dalil dan Hadis Zakat Pertanian</b>", ['parse_mode' => 'HTML']);
         $this->say("
 Dalil untuk zakat pertanian dapat ditemukan dalam Al-Qur'an dan Hadis Nabi Muhammad SAW. Salah satu dalil utama adalah dalam Al-Qur'an Surah Al-Baqarah ayat 267:
 
@@ -20,6 +20,11 @@ Dalil untuk zakat pertanian dapat ditemukan dalam Al-Qur'an dan Hadis Nabi Muham
 
 
 Wahai orang-orang yang beriman, tunaikanlah zakat sebagaimana yang telah diperintahkan kepada kamu oleh Allah. Dan janganlah kamu menjadikan kesalahan (karena penundaan atau mengeluarkan zakat) sebagai alasan bagi orang-orang yang beriman, tetaplah teguh dengan ketaatan kepada Allah dan hari kemudian, serta dirikanlah shalat dan tunaikanlah zakat dan berbuatlah kebajikan; sesungguhnya apa yang kamu kerjakan, adalah apa yang diperhatikan oleh Allah. (QS. Al-Baqarah: 267)
+
+Hadis dari Ibn Umar (RA):
+Rasulullah SAW bersabda, Tidak sah zakat harta yang tidak diambilnya dari hasil pertanian. (HR. Bukhari dan Muslim)
+
+
 ",['parse_mode' => 'Markdown']);
         // Instansiasi conversationZakatMaal
         $conversation = new conversationZakatMaalPertanian();

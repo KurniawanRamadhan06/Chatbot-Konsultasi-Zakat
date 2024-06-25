@@ -190,7 +190,43 @@ $botman->hears('(.*)', function ($bot) {
         {
             $apiReply = $extras['apiReply'];
             $bot->reply($apiReply);
-        } 
+        }
+        // FAQ
+        elseif($apiReply == 'baznas.faq.1')
+        {
+            $apiReply = $extras['apiReply'];
+            $bot->reply($apiReply);
+        }
+        elseif($apiReply == 'baznas.faq.2')
+        {
+            $apiReply = $extras['apiReply'];
+            $bot->reply($apiReply);
+        }
+        elseif($apiReply == 'baznas.faq.3')
+        {
+            $apiReply = $extras['apiReply'];
+            $bot->reply($apiReply);
+        }
+        elseif($apiReply == 'baznas.faq.4')
+        {
+            $apiReply = $extras['apiReply'];
+            $bot->reply($apiReply);
+        }
+        elseif($apiReply == 'baznas.faq.5')
+        {
+            $apiReply = $extras['apiReply'];
+            $bot->reply($apiReply);
+        }
+        elseif($apiReply == 'baznas.faq.6')
+        {
+            $apiReply = $extras['apiReply'];
+            $bot->reply($apiReply);
+        }
+        elseif($apiReply == 'baznas.faq.7')
+        {
+            $apiReply = $extras['apiReply'];
+            $bot->reply($apiReply);
+        }
         elseif($apiReply == 'baznas_ask1')
         {
             $apiReply = $extras['apiReply'];
@@ -380,6 +416,18 @@ $botman->hears('(.*)', function ($bot) {
             {
                 $bot->startConversation(new conversationZakatFitrahDalil);
             }
+        }
+        elseif($apiReply == 'input.z.m.dalil')
+        {
+            $apiReply = $extras['apiReply'];
+            if ($apiReply == 'spesifik') 
+            {
+                $bot->startConversation(new conversationDalil);
+            }
+            else
+            {
+                $bot->startConversation(new conversationZakatMaalDalil);
+            }
         } 
         elseif($apiReply == 'input.ask.zisedekah')
         {
@@ -401,7 +449,7 @@ $botman->hears('(.*)', function ($bot) {
                 $bot->reply($apiReply);
             } else 
             {
-                $bot->reply('intent tidak ditemukan');
+                $bot->reply('Terima kasih atas pertanyaan Anda mengenai zakat. Saat ini, saya belum memiliki informasi yang cukup untuk memberikan jawaban yang akurat terkait pertanyaan Anda. Anda tetap bisa mendapatkan jawaban terkait pertanyaan tersebut langsung dari Ustad Konsultasi Zakat dengan menghubungi kontak berikut: (+62) 852-6544-6800.');
             }
 
         }

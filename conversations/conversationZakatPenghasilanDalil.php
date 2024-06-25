@@ -12,7 +12,7 @@ class conversationZakatPenghasilanDalil extends Conversation
 {
     public function sayDalilPenghasilan()
     {
-        $this->say("<b>Dalil Zakat Penghasilan</b>", ['parse_mode' => 'HTML']);
+        $this->say("<b>Dalil dan Hadis Zakat Penghasilan</b>", ['parse_mode' => 'HTML']);
         $this->say('
 Semua penghasilan dari pekerjaan profesional, apabila telah mencapai niṣhāb, wajib dikeluarkan zakatnya. Hal ini berdasarkan dalil-dalil yang bersifat umum dan argumentasi-argumentasi berikut:
 
@@ -20,7 +20,9 @@ Semua penghasilan dari pekerjaan profesional, apabila telah mencapai niṣhāb, 
 
 “Ambillah zakat dari sebagian harta mereka, dengan zakat itu kamu membersihkan dan mensucikan mereka dan mendoalah untuk mereka. Sesungguhnya doa kamu itu (menjadi) ketenteraman jiwa bagi mereka. Dan Allah Maha Mendengar lagi Maha Mengetahui.” (Q.S. al-Taubah [9]: 103).
 
-        ',['parse_mode' => 'Markdown']);
+Hadis dari Abu Hurairah (RA):
+Rasulullah SAW bersabda, "Sedekah tidak akan mengurangi harta seseorang." (HR. Muslim)
+',['parse_mode' => 'Markdown']);
         // Instansiasi conversationZakatMaal
         $conversation = new conversationZakatMaalPenghasilan();
 

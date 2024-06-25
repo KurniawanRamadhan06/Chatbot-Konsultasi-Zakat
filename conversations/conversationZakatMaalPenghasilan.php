@@ -73,6 +73,27 @@ class conversationZakatMaalPenghasilan extends Conversation
             }
         });
     }
+    public function askConfirmHitung()
+    {
+        $question = Question::create('Apakah ada hal lain yang ingin Anda tanyakan?')
+		->addButtons([
+			Button::create('Ya')->value('0'),
+			Button::create('Tidak')->value('1'),
+			Button::create('Hitung Ulang')->value('2'),
+		]);
+
+        $this->ask($question, function (Answer $answer) {
+            if ($answer->getValue() === '0') {
+                $this->askPilihan();
+            }else if ($answer->getValue() === '2') {
+                $this->bot->startConversation(new conversationZakatPenghasilanPerhitungan());
+            }
+            else
+            {
+                $this->finish();
+            }
+        });
+    }
 
     /**
      * Start the conversation

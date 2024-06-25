@@ -17,7 +17,7 @@ class conversationZakatPeternakanPerhitungan extends Conversation
     ->addButtons([
         Button::create('Sapi/Kerbau')->value('0'),
         Button::create('Kambing/Biri-biri/Domba')->value('1'),
-        Button::create('Selesai')->value('2'),
+        Button::create('Batalkan')->value('2'),
     ]);
 
     $this->ask($question, function (Answer $answer) {
@@ -30,36 +30,60 @@ class conversationZakatPeternakanPerhitungan extends Conversation
         }
         else
         {
-            $this->finish();
+            $this->say('Terima kasih, Proses Dibatalkan.', ['parse_mode'=>'HTML']);
+
         }
     });
    }
 
 
-   public function convertToNumeric($input)
-{
-    // Menghapus karakter non-numeric
-    $input = preg_replace("/[^0-9]/", "", $input);
+   public function convertToNumeric($input) {
+    // Mengganti titik dengan kosong agar "5.000" menjadi "5000"
+    $input = str_replace('.', '', $input);
 
-    // Mengonversi kata menjadi angka
-    $words = ['juta', 'ribu', 'jutaan', 'ribuan', 'miliar', 'milyar', 'miliaran', 'triliun', 'trilyun'];
-    $replacements = ['1000000', '1000', '1000000', '1000', '1000000000', '1000000000', '1000000000', '1000000000000', '1000000000000'];
+    // Menangani berbagai kombinasi angka dan kata-kata
+    $wordsToNumbers = [
+        'juta' => 1000000,
+        'jutaan' => 1000000,
+        'ribu' => 1000,
+        'ribuan' => 1000,
+        'miliar' => 1000000000,
+        'milyar' => 1000000000,
+        'miliaran' => 1000000000,
+        'triliun' => 1000000000000,
+        'trilyun' => 1000000000000,
+    ];
 
-    $input = str_ireplace($words, $replacements, $input);
+    // Proses input untuk menggantikan kata-kata besar dengan angka
+    foreach ($wordsToNumbers as $word => $value) {
+        if (stripos($input, $word) !== false) {
+            if (preg_match('/(\d+)\s*' . $word . '/i', $input, $matches)) {
+                $input = str_ireplace($matches[0], $matches[1] * $value, $input);
+            }
+        }
+    }
+
+    // Menghapus semua karakter non-numeric kecuali titik desimal dan angka
+    $input = preg_replace("/[^0-9.]/", "", $input);
 
     return (float) $input;
 }
 
    public function askJumlahSapi()
 {
-    $this->ask('Berapa jumlah sapi/kerbau yang Anda miliki?', function (Answer $answer) {
+    $this->ask('Berapa jumlah ekor sapi/kerbau yang Anda miliki?', function (Answer $answer) {
         $jumlahSapi = $this->convertToNumeric($answer->getText());
         $nisab = 30; 
         $zakat = 0;
         $jenisZakat = '';
 
         if ($jumlahSapi < $nisab) {
-            $this->say("Anda tidak wajib membayar zakat karena jumlah sapi Anda kurang dari $nisab ekor.");
+            $outputHitung = "### Kalkulator Zakat Peternakan ###\n\n";
+            $outputHitung .= "Nisab untuk zakat peternakan dengan jenis ternak sapi/kerbau adalah 30 Ekor.\n\n";
+            $outputHitung .= "Kadar zakat ini didasarkan pada ketentuan syariat Islam yang mengatur zakat ternak, di mana jumlah zakat tergantung pada jumlah ternak yang dimiliki. \n\n";
+            $last = "\n\nAnda tetap bisa menyempurnakan niat baik dengan bersedekah";
+
+            $this->say($outputHitung. "Anda tidak wajib membayar zakat karena jumlah sapi/kerbau Anda yaitu $jumlahSapi ekor kurang dari nisab untuk berzakat minimal $nisab ekor.". $last);
             // Instansiasi conversationZakatMaal
             $conversation = new conversationZakatMaalPeternakan();
 
@@ -67,35 +91,35 @@ class conversationZakatPeternakanPerhitungan extends Conversation
             $this->bot->startConversation($conversation);
 
             // Langsung panggil metode finish
-            $conversation->askConfirm();
+            $conversation->askConfirmHitung();
         } else {
             if ($jumlahSapi >= 30 && $jumlahSapi <= 39) {
                 $zakat = 1;
-                $jenisZakat = "satu ekor sapi jantan/betina tabi (umur 1 tahun masuk ke 2 tahun)";
+                $jenisZakat = "satu ekor sapi/kerbau jantan/betina tabi (umur 1 tahun masuk ke 2 tahun)";
             } elseif ($jumlahSapi >= 40 && $jumlahSapi <= 59) {
                 $zakat = 1;
-                $jenisZakat = "satu ekor sapi jantan/betina musinnah (umur 2 tahun masuk ke 3 tahun)";
+                $jenisZakat = "satu ekor sapi/kerbau jantan/betina musinnah (umur 2 tahun masuk ke 3 tahun)";
             } elseif ($jumlahSapi >= 60 && $jumlahSapi <= 69) {
                 $zakat = 2;
-                $jenisZakat = "dua ekor sapi jantan/betina tabi (umur 1 tahun masuk ke 2 tahun)";
+                $jenisZakat = "dua ekor sapi/kerbau jantan/betina tabi (umur 1 tahun masuk ke 2 tahun)";
             } elseif ($jumlahSapi >= 70 && $jumlahSapi <= 79) {
                 $zakat = 1;
-                $jenisZakat = "satu ekor sapi jantan/betina musinnah (umur 2 tahun masuk ke 3 tahun) dan satu ekor sapi jantan/betina tabi (umur 1 tahun masuk ke 2 tahun)";
+                $jenisZakat = "satu ekor sapi/kerbau jantan/betina musinnah (umur 2 tahun masuk ke 3 tahun) dan satu ekor sapi/kerbau jantan/betina tabi (umur 1 tahun masuk ke 2 tahun)";
             } elseif ($jumlahSapi >= 80 && $jumlahSapi <= 89) {
                 $zakat = 2;
-                $jenisZakat = "dua ekor sapi jantan/betina musinnah (umur 2 tahun masuk ke 3 tahun)";
+                $jenisZakat = "dua ekor sapi/kerbau jantan/betina musinnah (umur 2 tahun masuk ke 3 tahun)";
             } elseif ($jumlahSapi >= 90 && $jumlahSapi <= 99) {
                 $zakat = 3;
-                $jenisZakat = "tiga ekor sapi jantan/betina tabi (umur 1 tahun masuk ke 2 tahun)";
+                $jenisZakat = "tiga ekor sapi/kerbau jantan/betina tabi (umur 1 tahun masuk ke 2 tahun)";
             } elseif ($jumlahSapi >= 100 && $jumlahSapi <= 109) {
                 $zakat = 2;
-                $jenisZakat = "dua ekor sapi jantan/betina musinnah (umur 2 tahun masuk ke 3 tahun)";
+                $jenisZakat = "dua ekor sapi/kerbau jantan/betina musinnah (umur 2 tahun masuk ke 3 tahun)";
             } elseif ($jumlahSapi >= 110 && $jumlahSapi <= 119) {
                 $zakat = 3;
-                $jenisZakat = "dua ekor sapi jantan/betina musinnah (umur 2 tahun masuk ke 3 tahun) dan satu ekor sapi jantan/betina tabi (umur 1 tahun masuk ke 2 tahun)";
+                $jenisZakat = "dua ekor sapi/kerbau jantan/betina musinnah (umur 2 tahun masuk ke 3 tahun) dan satu ekor sapi/kerbau jantan/betina tabi (umur 1 tahun masuk ke 2 tahun)";
             } elseif ($jumlahSapi >= 120 && $jumlahSapi <= 129) {
                 $zakat = 3;
-                $jenisZakat = "tiga ekor sapi jantan/betina musinnah (umur 2 tahun masuk ke 3 tahun) atau empat ekor sapi jantan/betina tabi (umur 1 tahun masuk ke 2 tahun)";
+                $jenisZakat = "tiga ekor sapi/kerbau jantan/betina musinnah (umur 2 tahun masuk ke 3 tahun) atau empat ekor sapi/kerbau jantan/betina tabi (umur 1 tahun masuk ke 2 tahun)";
             } else {
                 // Untuk jumlah sapi 130 ke atas
                 $zakat = 3; // Zakat dasar untuk 120 ekor sapi
@@ -108,8 +132,8 @@ class conversationZakatPeternakanPerhitungan extends Conversation
                 $zakatMusinnah = $jumlahMusinnah;
                 $zakat += $zakatTabi + $zakatMusinnah;
                 
-                $jenisZakatTabi = $zakatTabi > 0 ? "$zakatTabi ekor sapi jantan/betina tabi (umur 1 tahun masuk ke 2 tahun)" : '';
-                $jenisZakatMusinnah = $zakatMusinnah > 0 ? "$zakatMusinnah ekor sapi jantan/betina musinnah (umur 2 tahun masuk ke 3 tahun)" : '';
+                $jenisZakatTabi = $zakatTabi > 0 ? "$zakatTabi ekor sapi/kerbau jantan/betina tabi (umur 1 tahun masuk ke 2 tahun)" : '';
+                $jenisZakatMusinnah = $zakatMusinnah > 0 ? "$zakatMusinnah ekor sapi/kerbau jantan/betina musinnah (umur 2 tahun masuk ke 3 tahun)" : '';
                 
                 if ($jenisZakatTabi && $jenisZakatMusinnah) {
                     $jenisZakat = "$jenisZakatTabi dan $jenisZakatMusinnah";
@@ -120,7 +144,17 @@ class conversationZakatPeternakanPerhitungan extends Conversation
                 }
             }
 
-            $this->say("Berdasarkan $jumlahSapi ekor sapi, jumlah zakat yang harus Anda bayarkan adalah: $zakat ekor ($jenisZakat).");
+            $this->say("
+### Kalkulator Zakat Peternakan ###
+
+Nisab untuk zakat peternakan dengan jenis ternak sapi/kerbau adalah 30 Ekor.
+
+Kadar zakat ini didasarkan pada ketentuan syariat Islam yang mengatur zakat ternak, di mana jumlah zakat tergantung pada jumlah ternak yang dimiliki. 
+
+Berdasarkan ". number_format($jumlahSapi, 0, ',', '.') ." ekor sapi,
+
+jumlah zakat yang harus Anda bayarkan adalah
+= $zakat ekor ($jenisZakat).");
 
             // Instansiasi conversationZakatMaal
             $conversation = new conversationZakatMaalPeternakan();
@@ -129,14 +163,14 @@ class conversationZakatPeternakanPerhitungan extends Conversation
             $this->bot->startConversation($conversation);
 
             // Langsung panggil metode finish
-            $conversation->askConfirm();
+            $conversation->askConfirmHitung();
         }
     });
 }
 
     public function askJumlahKambing()
 {
-    $this->ask('Berapa jumlah kambing/biri-biri/domba yang Anda miliki?', function (Answer $message) {
+    $this->ask('Berapa jumlah ekor kambing/biri-biri/domba yang Anda miliki?', function (Answer $message) {
         $jumlahKambing = $this->convertToNumeric($message->getText());
         $zakat = 0;
 
@@ -155,7 +189,12 @@ class conversationZakatPeternakanPerhitungan extends Conversation
         }
 
         if ($jumlahKambing < 40) {
-            $this->say("Anda tidak wajib membayar zakat karena jumlah kambing Anda kurang dari 40 ekor.");
+            $outputHitung = "### Kalkulator Zakat Peternakan ###\n\n";
+            $outputHitung .= "Nisab untuk zakat peternakan dengan jenis ternak  kambing/biri-biri/domba adalah 40 Ekor.\n\n";
+            $outputHitung .= "Kadar zakat ini didasarkan pada ketentuan syariat Islam yang mengatur zakat ternak, di mana jumlah zakat tergantung pada jumlah ternak yang dimiliki.\n\n";
+            $last = "\n\nAnda tetap bisa menyempurnakan niat baik dengan bersedekah";
+
+            $this->say($outputHitung. "Anda tidak wajib membayar zakat karena jumlah kambing Anda yaitu $jumlahKambing kurang dari nisab untuk berzakat minimal 40 ekor.".$last);
             // Instansiasi conversationZakatMaal
             $conversation = new conversationZakatMaalPeternakan();
 
@@ -163,9 +202,13 @@ class conversationZakatPeternakanPerhitungan extends Conversation
             $this->bot->startConversation($conversation);
 
             // Langsung panggil metode finish
-            $conversation->askConfirm();
+            $conversation->askConfirmHitung();
         } else {
-            $this->say("Berdasarkan $jumlahKambing ekor kambing, jumlah zakat yang harus Anda bayarkan adalah: $zakat ekor (umur 1 Tahun untuk kambing/biri-biri/domba).");
+            $outputHitung = "### Kalkulator Zakat Peternakan ###\n\n";
+            $outputHitung .= "Nisab untuk zakat peternakan dengan jenis ternak  kambing/biri-biri/domba adalah 40 Ekor.\n\n";
+            $outputHitung .= "Kadar zakat ini didasarkan pada ketentuan syariat Islam yang mengatur zakat ternak, di mana jumlah zakat tergantung pada jumlah ternak yang dimiliki.\n\n";
+
+            $this->say($outputHitung. "Berdasarkan $jumlahKambing ekor kambing, jumlah zakat yang harus Anda bayarkan adalah: $zakat ekor (umur 1 Tahun untuk kambing/biri-biri/domba).");
             // Instansiasi conversationZakatMaal
             $conversation = new conversationZakatMaalPeternakan();
 
@@ -173,7 +216,7 @@ class conversationZakatPeternakanPerhitungan extends Conversation
             $this->bot->startConversation($conversation);
 
             // Langsung panggil metode finish
-            $conversation->askConfirm();
+            $conversation->askConfirmHitung();
         }
     });
 }

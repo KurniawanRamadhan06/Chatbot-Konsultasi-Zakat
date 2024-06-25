@@ -46,6 +46,28 @@ class conversationZakatFitrah extends Conversation
             }
         });
     }
+    public function askConfirmHitung()
+    {
+        $question = Question::create('Apakah ada hal lain yang ingin Anda tanyakan?')
+		->addButtons([
+			Button::create('Ya')->value('0'),
+			Button::create('Tidak')->value('1'),
+			Button::create('Hitung Ulang')->value('2'),
+		]);
+
+        $this->ask($question, function (Answer $answer) {
+            if ($answer->getValue() === '0') {
+                $this->askPilihan();
+            }else if ($answer->getValue() === '2') {
+                $this->perhitunganZFitrah();
+            }
+            else
+            {
+                $this->finish();
+            }
+        });
+    }
+
     public function askConfirm()
     {
         $question = Question::create('Apakah ada hal lain yang ingin Anda tanyakan?')
@@ -82,48 +104,78 @@ class conversationZakatFitrah extends Conversation
     public function perhitunganZFitrah()
     {
         $this->say("<b>Perhitungan Zakat Fitrah</b>", ['parse_mode'=>'HTML']);
-        $this->say('Besarannya adalah beras atau makanan pokok seberat 2, 5 kg atau 3, 5 liter per jiwa. berdasarkan hadist Dari Ibn Umar RA, Rasulullah SAW bersabda, Rasulullah SAW, mewajibkan zakat fitrah dengan satu sha kurma atau satu sha gandum bagi setiap muslim yang merdeka maupun budak, laki-laki maupun perempuan, anak kecil maupun dewasa. Zakat tersebut diperintahkan dikeluarkan sebelum orang-orang keluar untuk melaksanakan sholat ied. (HR. Bukhari). ',['parse_mode' => 'HTML']);
+        $this->say('Besarannya adalah beras atau makanan pokok seberat 2,5 kg atau 3,5 liter per jiwa. berdasarkan hadist Dari Ibn Umar RA, Rasulullah SAW bersabda, Rasulullah SAW, mewajibkan zakat fitrah dengan satu sha kurma atau satu sha gandum bagi setiap muslim yang merdeka maupun budak, laki-laki maupun perempuan, anak kecil maupun dewasa. Zakat tersebut diperintahkan dikeluarkan sebelum orang-orang keluar untuk melaksanakan sholat ied. (HR. Bukhari). ',['parse_mode' => 'HTML']);
         $this->kalkulatorZakatFitrah();
     }
-    public function convertToNumeric($input)
-    {
-        // Menghapus karakter non-numeric
-        $input = preg_replace("/[^0-9]/", "", $input);
+    public function convertToNumeric($input) {
+        // Mengganti titik dengan kosong agar "5.000" menjadi "5000"
+        $input = str_replace('.', '', $input);
 
-        // Mengonversi kata menjadi angka
-        $words = ['juta', 'ribu', 'jutaan', 'ribuan', 'miliar', 'milyar', 'miliaran', 'triliun', 'trilyun'];
-        $replacements = ['1000000', '1000', '1000000', '1000', '1000000000', '1000000000', '1000000000', '1000000000000', '1000000000000'];
+        // Menangani berbagai kombinasi angka dan kata-kata
+        $wordsToNumbers = [
+            'juta' => 1000000,
+            'jutaan' => 1000000,
+            'ribu' => 1000,
+            'ribuan' => 1000,
+            'miliar' => 1000000000,
+            'milyar' => 1000000000,
+            'miliaran' => 1000000000,
+            'triliun' => 1000000000000,
+            'trilyun' => 1000000000000,
+        ];
 
-        $input = str_ireplace($words, $replacements, $input);
+        // Proses input untuk menggantikan kata-kata besar dengan angka
+        foreach ($wordsToNumbers as $word => $value) {
+            if (stripos($input, $word) !== false) {
+                if (preg_match('/(\d+)\s*' . $word . '/i', $input, $matches)) {
+                    $input = str_ireplace($matches[0], $matches[1] * $value, $input);
+                }
+            }
+        }
+
+        // Menghapus semua karakter non-numeric kecuali titik desimal dan angka
+        $input = preg_replace("/[^0-9.]/", "", $input);
 
         return (float) $input;
     }
 
-    public function kalkulatorZakatFitrah(){
-        $this->say('<b>Kalkulator Zakat Fitrah</b>', ['parse_mode' => 'html']);
+    public function kalkulatorZakatFitrah()
+{
+    $this->say('<b>Kalkulator Zakat Fitrah</b>', ['parse_mode' => 'html']);
+
+    $this->ask('Berapa jumlah anggota keluarga yang akan Anda berikan zakat fitrah?(berapa orang)', function ($answer, $conversation) {
+        $jumlahAnggotaKeluarga = $this->convertToNumeric($answer->getText());
         
-        $this->ask('Berapa jumlah anggota keluarga yang akan Anda berikan zakat fitrah?', function ($answer, $conversation) {
-            $jumlahAnggotaKeluarga = $this->convertToNumeric($answer->getText());
-            
-            $jenisBeras = ['pandan wangi', 'solok', 'ramos', 'top koki', 'belida', 'bulog'];
-            $this->ask('Jenis beras (' . implode(', ', $jenisBeras) . ')?', function($answer, $conversation) use ($jumlahAnggotaKeluarga, $jenisBeras) {
-                $jenisBerasInput = strtolower($answer->getText());
-                if (!in_array($jenisBerasInput, $jenisBeras)) {
-                    $conversation->repeat();
-                    return;
-                }
-    
-                $conversation->ask('Harga beras ' . ucfirst($jenisBerasInput) . ' per kg (pada wilayah anda)?', function($answer, $conversation) use ($jumlahAnggotaKeluarga, $jenisBerasInput) {
-                    $hargaBerasPerKg = $this->convertToNumeric($answer->getText());
-                    $jumlahZakatFitrah = $jumlahAnggotaKeluarga * 2.5; // Sesuai dengan standar makanan pokok yang digunakan untuk perhitungan zakat fitrah
-                    $jumlahAnggotaKeluarga = number_format($jumlahAnggotaKeluarga, 0, ',', '.');
-                    $hargaBayarSetara = $jumlahZakatFitrah * $hargaBerasPerKg;
-                    $zakatRupiah = number_format($hargaBayarSetara, 0, ',', '.');
-                    
-                    $conversation->say("
-Jumlah anggota keluarga : {$jumlahAnggotaKeluarga}
+        $question = Question::create('Pilih jenis beras:')
+            ->fallback('Pilihan tidak valid')
+            ->callbackId('ask_jenis_beras')
+            ->addButtons([
+                Button::create('Pandan Wangi')->value('pandan wangi'),
+                Button::create('Solok')->value('solok'),
+                Button::create('Ramos')->value('ramos'),
+                Button::create('Top Koki')->value('top koki'),
+                Button::create('Belida')->value('belida'),
+                Button::create('Bulog')->value('bulog'),
+            ]);
+
+        $this->ask($question, function ($answer, $conversation) use ($jumlahAnggotaKeluarga) {
+            $jenisBerasInput = strtolower($answer->getValue());
+            if (!in_array($jenisBerasInput, ['pandan wangi', 'solok', 'ramos', 'top koki', 'belida', 'bulog'])) {
+                $this->say('Pilihan tidak valid.');
+                return $this->repeat();
+            }
+
+            $this->ask('Harga beras ' . ucfirst($jenisBerasInput) . ' per kg (pada wilayah anda)?', function ($answer, $conversation) use ($jumlahAnggotaKeluarga, $jenisBerasInput) {
+                $hargaBerasPerKg = $this->convertToNumeric($answer->getText());
+                $jumlahZakatFitrah = $jumlahAnggotaKeluarga * 2.5; // Sesuai dengan standar makanan pokok yang digunakan untuk perhitungan zakat fitrah
+                $jumlahAnggotaKeluargaFormatted = number_format($jumlahAnggotaKeluarga, 0, ',', '.');
+                $hargaBayarSetara = $jumlahZakatFitrah * $hargaBerasPerKg;
+                $zakatRupiah = number_format($hargaBayarSetara, 0, ',', '.');
+
+                $this->say("
+Jumlah anggota keluarga : {$jumlahAnggotaKeluargaFormatted} orang
 Jenis Beras : {$jenisBerasInput}
-Harga Beras : Rp " . number_format($hargaBerasPerKg, 0, ',', '.'). "
+Harga Beras : Rp " . number_format($hargaBerasPerKg, 0, ',', '.') . "
 
 Besaran zakat fitrah yang ditetapkan yakni sebesar 2,5 kg per jiwa. 
 
@@ -132,13 +184,13 @@ Jumlah Zakat Fitrah
 = {$jumlahAnggotaKeluarga} orang x 2.5
 = {$jumlahZakatFitrah} Kg
 
-Sehingga Jumlah<b> Zakat Fitrah</b> yang harus Anda bayar adalah <b> $jumlahZakatFitrah kg beras </b> atau uang sejumlah <b> Rp $zakatRupiah </b>", ['parse_mode' => 'html']);
-                    
-                    $this->askConfirm();
-                });
+Sehingga Jumlah <b>Zakat Fitrah</b> yang harus Anda bayar adalah <b>{$jumlahZakatFitrah} kg beras</b> atau uang sejumlah <b>Rp {$zakatRupiah}</b>", ['parse_mode' => 'html']);
+                
+                $this->askConfirmHitung();
             });
         });
-    }
+    });
+}
 
     public function finish() 
     {

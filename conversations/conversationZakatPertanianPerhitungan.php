@@ -20,9 +20,19 @@ class conversationZakatPertanianPerhitungan extends Conversation
 
     public function askJenisPertanian()
     {
-        $this->ask('Pilih jenis pertanian: Beras atau Gabah?', function (Answer $message) {
-            $this->jenisPertanian = strtolower($message->getText());
-            if (!in_array($this->jenisPertanian, ['beras', 'gabah'])) {
+        $question = Question::create('Pilih jenis pertanian:')
+            ->fallback('Pilihan tidak valid')
+            ->callbackId('ask_jenis_pertanian')
+            ->addButtons([
+                Button::create('Beras')->value('beras'),
+                Button::create('Gabah')->value('gabah'),
+                Button::create('Sawit')->value('sawit'),
+                Button::create('Jagung')->value('jagung'),
+            ]);
+
+        $this->ask($question, function (Answer $answer) {
+            $this->jenisPertanian = strtolower($answer->getValue());
+            if (!in_array($this->jenisPertanian, ['beras', 'gabah', 'sawit', 'jagung'])) {
                 $this->say('Pilihan tidak valid.');
                 return $this->repeat();
             }
@@ -30,17 +40,35 @@ class conversationZakatPertanianPerhitungan extends Conversation
         });
     }
 
-    public function convertToNumeric($input)
-    {
-        // Menghapus karakter non-numeric
-        $input = preg_replace("/[^0-9]/", "", $input);
-
-        // Mengonversi kata menjadi angka
-        $words = ['juta', 'ribu', 'jutaan', 'ribuan', 'miliar', 'milyar', 'miliaran', 'triliun', 'trilyun'];
-        $replacements = ['1000000', '1000', '1000000', '1000', '1000000000', '1000000000', '1000000000', '1000000000000', '1000000000000'];
-
-        $input = str_ireplace($words, $replacements, $input);
-
+    public function convertToNumeric($input) {
+        // Mengganti titik dengan kosong agar "5.000" menjadi "5000"
+        $input = str_replace('.', '', $input);
+    
+        // Menangani berbagai kombinasi angka dan kata-kata
+        $wordsToNumbers = [
+            'juta' => 1000000,
+            'jutaan' => 1000000,
+            'ribu' => 1000,
+            'ribuan' => 1000,
+            'miliar' => 1000000000,
+            'milyar' => 1000000000,
+            'miliaran' => 1000000000,
+            'triliun' => 1000000000000,
+            'trilyun' => 1000000000000,
+        ];
+    
+        // Proses input untuk menggantikan kata-kata besar dengan angka
+        foreach ($wordsToNumbers as $word => $value) {
+            if (stripos($input, $word) !== false) {
+                if (preg_match('/(\d+)\s*' . $word . '/i', $input, $matches)) {
+                    $input = str_ireplace($matches[0], $matches[1] * $value, $input);
+                }
+            }
+        }
+    
+        // Menghapus semua karakter non-numeric kecuali titik desimal dan angka
+        $input = preg_replace("/[^0-9.]/", "", $input);
+    
         return (float) $input;
     }
 
@@ -61,9 +89,16 @@ class conversationZakatPertanianPerhitungan extends Conversation
     }
     public function askUseAirBerbayar()
     {
-        $this->ask('Apakah menggunakan perairan berbayar [ya atau tidak]?', function (Answer $message) {
-            $jenis = $message->getText();
-            $this->jenisAir = strtolower($jenis);
+        $question = Question::create('Apakah menggunakan perairan berbayar?')
+            ->fallback('Pilihan tidak valid')
+            ->callbackId('ask_use_air_berbayar')
+            ->addButtons([
+                Button::create('Ya')->value('ya'),
+                Button::create('Tidak')->value('tidak'),
+            ]);
+
+        $this->ask($question, function (Answer $answer) {
+            $this->jenisAir = strtolower($answer->getValue());
             if (!in_array($this->jenisAir, ['ya', 'tidak'])) {
                 $this->say('Pilihan tidak valid.');
                 return $this->repeat();
@@ -77,6 +112,8 @@ class conversationZakatPertanianPerhitungan extends Conversation
     switch ($this->jenisPertanian) {
         case 'beras':
         case 'gabah':
+        case 'sawit':
+        case 'jagung':
             $nisab = 653; // Nisab dalam kilogram atau liter
             break;
         default:
@@ -90,24 +127,48 @@ class conversationZakatPertanianPerhitungan extends Conversation
         $jenisAir = 0.10;
     }
 
+    $nisab = 653;
     $totalNilai = $this->hasilPanen * $this->hargaKomoditas * $jenisAir;
     $subtotal = $this->hasilPanen * $this->hargaKomoditas + $totalNilai;
 
     if ($this->hasilPanen < $nisab) {
-        $this->say("Anda tidak wajib membayar zakat karena total nilai harta kurang dari nisab.");
+        $outputRumus = "### Kalkulator Zakat Pertanian ###\n\n";
+        $outputRumus .= "Jenis Pertanian: {$this->jenisPertanian}\n";
+        $outputRumus .= "Hasil Panen: " . number_format($this->hasilPanen, 0, ',', '.') . " kg\n";
+        $outputRumus .= "Harga jual komoditas: Rp " . number_format($this->hargaKomoditas, 0, ',', '.') . " per kg\n";
+        $outputRumus .= "Total Nilai Harta: Rp " . number_format($subtotal, 0, ',', '.')." \n\n";
+        
+        $outputRumus .= "Nisab ".$this->jenisPertanian." adalah sebesar {$nisab} kg Sesuai ketentuan Baznas Kota Pekanbaru\n\n";
+
+        $this->say($outputRumus ."Nilai Hasil Panen Anda belum mencapai nisab. Tetapi, Anda tetap bisa menyempurnakan niat baik dengan bersedekah.");
+        // Instansiasi conversationZakatMaal
+        $conversation = new conversationZakatMaalPertanian();
+
+        // Jalankan metode run jika perlu
+        $this->bot->startConversation($conversation);
+
+        // Langsung panggil metode finish
+        $conversation->askConfirmHitung();
+
         return;
     }
 
     $zakat = $subtotal * 0.025; // Zakat 2.5% dari total nilai harta
     $hasilpanen = $this->hasilPanen;
     $hargaKomoditas = $this->hargaKomoditas;
-    $this->say("Jenis Pertanian: {$this->jenisPertanian}\nHasil Panen: " . number_format($this->hasilPanen, 0, ',', '.') . " kg\nHarga jual komoditas: Rp " . number_format($this->hargaKomoditas, 0, ',', '.') . " per kg\nTotal Nilai Harta: Rp " . number_format($subtotal, 0, ',', '.') . 
-"
+    $this->say("
+### Kalkulator Zakat Pertanian ###
+
+Jenis Pertanian: {$this->jenisPertanian}\nHasil Panen: " . number_format($this->hasilPanen, 0, ',', '.') . " kg\nHarga jual komoditas: Rp " . number_format($this->hargaKomoditas, 0, ',', '.') . " per kg\nTotal Nilai Harta: Rp " . number_format($subtotal, 0, ',', '.') ."
+
+Nisab Zakat pertanian ". $this->jenisPertanian ." adalah sebesar {$nisab} kg Sesuai ketentuan Baznas Kota Pekanbaru.
 
 Jumlah zakat pertanian 
 = (Hasil panen x harga jual) + jenis peraian x 2.5%
 = ".number_format($hasilpanen, 0, ',', '.')." x ".number_format($hargaKomoditas, 0, ',', '.')." + {$totalNilai} x 2.5%
 = Rp ".number_format($zakat, 0, ',', '.')."
+
+Karena hasil panen anda melebihi nisab, yaitu sebesar ".number_format($hasilpanen, 0, ',', '.')." kg
 \nZakat yang harus dibayarkan: Rp " . number_format($zakat, 0, ',', '.'));
 // Instansiasi conversationZakatMaal
 $conversation = new conversationZakatMaalPertanian();
@@ -116,7 +177,7 @@ $conversation = new conversationZakatMaalPertanian();
 $this->bot->startConversation($conversation);
 
 // Langsung panggil metode finish
-$conversation->askConfirm();
+$conversation->askConfirmHitung();
 }
 
     /**
