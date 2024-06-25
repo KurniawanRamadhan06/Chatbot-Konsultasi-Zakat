@@ -14,7 +14,6 @@
 <ul>
   <li>Dialogflow - Platform pemrosesan bahasa alami (NLP)</li>
   <li>Botman - Framework chatbot berbasis PHP</li>
-  <li>Laravel - Framework PHP untuk pengembangan web</li>
   <li>MySQL - Basis data relasional</li>
 </ul>
 
